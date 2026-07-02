@@ -1,0 +1,1100 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>托辊成本核算工具</title>
+  <style>
+    :root {
+      --bg: #f4f6f7;
+      --card: #ffffff;
+      --ink: #172026;
+      --muted: #64717a;
+      --line: #dce3e8;
+      --accent: #0f766e;
+      --accent-dark: #0b5f59;
+      --danger: #b91c1c;
+      --soft: #eef4f3;
+      --shadow: 0 8px 22px rgba(15, 23, 42, .08);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif;
+      line-height: 1.4;
+    }
+
+    input, textarea, select, button {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+    .app {
+      max-width: 560px;
+      margin: 0 auto;
+      padding: 10px 10px 94px;
+    }
+
+    .head {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      margin: -10px -10px 10px;
+      padding: calc(10px + env(safe-area-inset-top)) 10px 10px;
+      background: rgba(244, 246, 247, .96);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(10px);
+    }
+
+    .head-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .head-text {
+      min-width: 0;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 20px;
+      letter-spacing: 0;
+    }
+
+    .head p {
+      margin: 3px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .total-card {
+      display: grid;
+      gap: 4px;
+      padding: 14px;
+      color: #fff;
+      background: #102a43;
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    .total-card span {
+      font-size: 13px;
+      opacity: .85;
+    }
+
+    .total-card strong {
+      font-size: 32px;
+      line-height: 1.05;
+      overflow-wrap: anywhere;
+    }
+
+    .total-card small {
+      opacity: .75;
+    }
+
+    .section {
+      margin-top: 10px;
+      padding: 12px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .model-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .model-card {
+      min-height: 74px;
+      padding: 12px;
+      border-radius: 8px;
+      background: #fff;
+      border: 1px solid var(--line);
+      color: var(--ink);
+      box-shadow: var(--shadow);
+      display: grid;
+      align-content: center;
+      gap: 4px;
+      text-align: left;
+    }
+
+    .model-card strong {
+      font-size: 20px;
+      letter-spacing: 0;
+    }
+
+    .model-card span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .section-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 16px;
+      letter-spacing: 0;
+    }
+
+    .hint {
+      margin: 0 0 10px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .grid {
+      display: grid;
+      gap: 9px;
+    }
+
+    .two {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    label {
+      display: grid;
+      gap: 4px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      min-height: 46px;
+      padding: 10px 11px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+      outline: none;
+      font-size: 16px;
+    }
+
+    textarea {
+      min-height: 76px;
+      resize: vertical;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(15, 118, 110, .12);
+    }
+
+    .btn {
+      min-height: 44px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      background: #e7edf0;
+      color: var(--ink);
+      font-weight: 800;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .btn.primary {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .btn.primary:active {
+      background: var(--accent-dark);
+    }
+
+    .btn.danger {
+      color: var(--danger);
+      background: #fee2e2;
+    }
+
+    .btn.small {
+      min-height: 36px;
+      padding: 7px 10px;
+      font-size: 13px;
+    }
+
+    .roller {
+      margin-top: 10px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfcfd;
+    }
+
+    .roller:first-child {
+      margin-top: 0;
+    }
+
+    .roller-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .roller-title {
+      display: grid;
+      gap: 3px;
+    }
+
+    .roller-title strong {
+      font-size: 15px;
+    }
+
+    .roller-title span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .calc-box {
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 8px;
+      background: var(--soft);
+      display: grid;
+      gap: 7px;
+      font-size: 13px;
+    }
+
+    .calc-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--muted);
+    }
+
+    .calc-row strong {
+      color: var(--ink);
+      text-align: right;
+      overflow-wrap: anywhere;
+    }
+
+    .calc-row.final {
+      padding-top: 7px;
+      border-top: 1px solid #d4dedc;
+      color: var(--ink);
+      font-size: 15px;
+      font-weight: 800;
+    }
+
+    .calc-row.final strong {
+      color: var(--accent);
+      font-size: 18px;
+    }
+
+    .bottom {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 20;
+      padding: 9px 10px calc(9px + env(safe-area-inset-bottom));
+      background: rgba(255, 255, 255, .97);
+      border-top: 1px solid var(--line);
+      backdrop-filter: blur(10px);
+    }
+
+    .bottom-inner {
+      max-width: 560px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 82px;
+      z-index: 30;
+      transform: translateX(-50%);
+      max-width: calc(100vw - 24px);
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: #172026;
+      color: #fff;
+      font-size: 14px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .18s, transform .18s;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(-5px);
+    }
+
+    @media (max-width: 390px) {
+      .app {
+        padding-left: 8px;
+        padding-right: 8px;
+      }
+
+      .head {
+        margin-left: -8px;
+        margin-right: -8px;
+      }
+
+      .two {
+        grid-template-columns: 1fr;
+      }
+
+      .model-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .bottom-inner {
+        grid-template-columns: 1fr;
+      }
+    }
+
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="head">
+      <div class="head-row">
+        <div class="head-text">
+          <h1 id="pageTitle">托辊成本核算</h1>
+          <p id="pageSubtitle">先选型号，再单独核算这个型号的成本。</p>
+        </div>
+        <button class="btn small hidden" id="backBtn" type="button">返回型号</button>
+      </div>
+    </header>
+
+    <section class="section" id="homeView">
+      <div class="section-title">
+        <h2>选择托辊型号</h2>
+      </div>
+      <div class="model-grid" id="modelList"></div>
+    </section>
+
+    <div id="detailView" class="hidden">
+      <section class="total-card">
+        <span>单根售价</span>
+        <strong id="grandTotal">¥0.00</strong>
+        <small id="grandInfo">成本 ¥0.00，利润 ¥0.00</small>
+      </section>
+
+      <section class="section">
+        <div class="section-title">
+          <h2>核算信息</h2>
+        </div>
+        <div class="grid two">
+          <label>项目 / 订单
+            <input id="customer" placeholder="可不填，例如：张三这批托辊">
+          </label>
+          <label>核算日期
+            <input id="date" type="date">
+          </label>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-title">
+          <h2>每次填写</h2>
+          <button class="btn small" id="savePriceBtn" type="button">保存价格</button>
+        </div>
+        <p class="hint">这些不是按型号默认的，进入型号后先填这里。</p>
+        <div class="grid two">
+          <label>一根管单价
+            <input id="pipePrice" type="number" inputmode="decimal" min="0" step="0.01" value="0">
+          </label>
+          <label>一米轴价格
+            <input id="shaftMeterPrice" type="number" inputmode="decimal" min="0" step="0.01" value="0">
+          </label>
+          <label>管的长度
+            <input id="pipeLength" type="number" inputmode="decimal" min="0" step="0.01" value="5.9">
+          </label>
+          <label>洗边
+            <input id="edgePrice" type="number" inputmode="decimal" min="0" step="0.01" value="0">
+          </label>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-title">
+          <h2>型号默认值</h2>
+        </div>
+        <p class="hint">点型号后会自动填好，也可以手动改。</p>
+        <div class="grid two">
+          <label>轴承总价
+            <input id="bearingPrice" type="number" inputmode="decimal" min="0" step="0.01" value="0">
+          </label>
+          <label>油封总价
+            <input id="sealPrice" type="number" inputmode="decimal" min="0" step="0.01" value="0">
+          </label>
+          <label>瓦盒总价
+            <input id="housingPrice" type="number" inputmode="decimal" min="0" step="0.01" value="0">
+          </label>
+          <label>卡簧总价
+            <input id="clipPrice" type="number" inputmode="decimal" min="0" step="0.01" value="0">
+          </label>
+          <label>人工价格
+            <input id="laborPrice" type="number" inputmode="decimal" min="0" step="0.01" value="0">
+          </label>
+          <label>烤漆
+            <input id="paintPrice" type="number" inputmode="decimal" min="0" step="0.01" value="0">
+          </label>
+          <label>杂费
+            <input id="miscPrice" type="number" inputmode="decimal" min="0" step="0.01" value="0">
+          </label>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-title">
+          <h2>当前型号和计算</h2>
+          <button class="btn small" id="newBtn" type="button">清空本型号</button>
+        </div>
+        <div id="rollers"></div>
+      </section>
+
+      <section class="section">
+        <div class="section-title">
+          <h2>备注</h2>
+        </div>
+        <textarea id="note" placeholder="例如：这里是自己看的成本，不是给客户的售价。"></textarea>
+      </section>
+
+    </div>
+  </main>
+
+  <nav class="bottom hidden" id="actionBar">
+    <div class="bottom-inner">
+      <button class="btn primary" id="copyBtn" type="button">复制成本</button>
+    </div>
+  </nav>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const draftKey = "roller_quote_draft_v1";
+    const priceKey = "roller_quote_prices_v1";
+    const $ = (id) => document.getElementById(id);
+
+    const priceFields = [
+      "pipePrice",
+      "pipeLength",
+      "shaftMeterPrice",
+      "bearingPrice",
+      "sealPrice",
+      "housingPrice",
+      "clipPrice",
+      "laborPrice",
+      "edgePrice",
+      "paintPrice",
+      "miscPrice"
+    ];
+    const formFields = ["customer", "date", "note", ...priceFields];
+    const state = { rollers: [] };
+    const rollerModels = [
+      "89*190",
+      "89*240",
+      "89*305",
+      "89*375",
+      "89*455",
+      "89*600",
+      "89*750",
+      "89*950",
+      "89*1150",
+      "89*1400",
+      "108*375",
+      "108*455",
+      "108*525",
+      "108*1150",
+      "108*1400",
+      "108*1600"
+    ];
+    const defaultShaftLengths = {
+      "89*190": 220,
+      "89*240": 270,
+      "89*305": 335,
+      "89*375": 415,
+      "89*455": 495,
+      "89*600": 640,
+      "89*750": 790,
+      "89*950": 990,
+      "89*1150": 1190,
+      "89*1400": 1440,
+      "108*375": 415,
+      "108*455": 495,
+      "108*525": 565,
+      "108*1150": 1190,
+      "108*1400": 1440,
+      "108*1600": 1640
+    };
+    const defaultLaborPrices = {
+      "89*190": 1.45,
+      "89*240": 1.45,
+      "89*305": 1.45,
+      "89*375": 1.45,
+      "89*455": 1.8,
+      "89*600": 1.6,
+      "89*750": 1.6,
+      "89*950": 1.6,
+      "89*1150": 1.6,
+      "89*1400": 2.35,
+      "108*375": 2.6,
+      "108*455": 2.6,
+      "108*525": 2.6,
+      "108*1150": 3.1,
+      "108*1400": 3.5,
+      "108*1600": 3.8
+    };
+    const defaultPaintPrices = {
+      "89*190": 0.4,
+      "89*240": 0.4,
+      "89*305": 0.4,
+      "89*375": 0.8,
+      "89*455": 0.9,
+      "89*600": 1.2,
+      "89*750": 1.3,
+      "89*950": 1.5,
+      "89*1150": 2.5,
+      "89*1400": 3,
+      "108*375": 1.1,
+      "108*455": 1.3,
+      "108*525": 1.5,
+      "108*1150": 3,
+      "108*1400": 4,
+      "108*1600": 5
+    };
+    const defaultBearingPrices = {
+      "89*190": 2.14,
+      "89*240": 2.14,
+      "89*305": 2.14,
+      "89*375": 2.14,
+      "89*455": 2.14,
+      "89*600": 2.14,
+      "89*750": 2.14,
+      "89*950": 2.14,
+      "89*1150": 2.14,
+      "89*1400": 2.14,
+      "108*375": 4.3,
+      "108*455": 4.3,
+      "108*525": 4.3,
+      "108*1150": 4.3,
+      "108*1400": 4.3,
+      "108*1600": 4.3
+    };
+    const defaultHousingPrices = {
+      "89*190": 1.04,
+      "89*240": 1.04,
+      "89*305": 1.04,
+      "89*375": 1.04,
+      "89*455": 1.04,
+      "89*600": 1.04,
+      "89*750": 1.04,
+      "89*950": 1.04,
+      "89*1150": 1.04,
+      "89*1400": 1.04,
+      "108*375": 1.76,
+      "108*455": 1.76,
+      "108*525": 1.76,
+      "108*1150": 1.76,
+      "108*1400": 1.76,
+      "108*1600": 1.76
+    };
+    const defaultClipPrices = {
+      "89*190": 0.07,
+      "89*240": 0.07,
+      "89*305": 0.07,
+      "89*375": 0.07,
+      "89*455": 0.07,
+      "89*600": 0.07,
+      "89*750": 0.07,
+      "89*950": 0.07,
+      "89*1150": 0.07,
+      "89*1400": 0.07,
+      "108*375": 0.09,
+      "108*455": 0.09,
+      "108*525": 0.09,
+      "108*1150": 0.09,
+      "108*1400": 0.09,
+      "108*1600": 0.09
+    };
+    const defaultMiscPrices = {
+      "89*190": 0.5,
+      "89*240": 0.5,
+      "89*305": 0.5,
+      "89*375": 0.5,
+      "89*455": 0.5,
+      "89*600": 0.5,
+      "89*750": 0.5,
+      "89*950": 0.5,
+      "89*1150": 0.5,
+      "89*1400": 0.5,
+      "108*375": 0.6,
+      "108*455": 0.6,
+      "108*525": 0.6,
+      "108*1150": 0.6,
+      "108*1400": 0.6,
+      "108*1600": 0.6
+    };
+    const defaultSealPrices = {
+      "89*190": 0.24,
+      "89*240": 0.24,
+      "89*305": 0.24,
+      "89*375": 0.24,
+      "89*455": 0.24,
+      "89*600": 0.24,
+      "89*750": 0.24,
+      "89*950": 0.24,
+      "89*1150": 0.24,
+      "89*1400": 0.24,
+      "108*375": 0.48,
+      "108*455": 0.48,
+      "108*525": 0.48,
+      "108*1150": 0.48,
+      "108*1400": 0.48,
+      "108*1600": 0.48
+    };
+
+    function today() {
+      const now = new Date();
+      const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
+      return local.toISOString().slice(0, 10);
+    }
+
+    function num(value) {
+      const n = Number(value);
+      return Number.isFinite(n) ? n : 0;
+    }
+
+    function money(value) {
+      return "¥" + Math.max(0, num(value)).toLocaleString("zh-CN", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+    }
+
+    function toast(text) {
+      $("toast").textContent = text;
+      $("toast").classList.add("show");
+      clearTimeout(window.toastTimer);
+      window.toastTimer = setTimeout(() => $("toast").classList.remove("show"), 1600);
+    }
+
+    function makeRoller() {
+      return {
+        id: Date.now().toString(36) + Math.random().toString(36).slice(2),
+        model: "",
+        pipeLen: "",
+        shaftLen: ""
+      };
+    }
+
+    function currentRoller() {
+      if (!state.rollers[0]) state.rollers = [makeRoller()];
+      return state.rollers[0];
+    }
+
+    function pipeLenFromModel(model) {
+      const parts = String(model || "").split("*");
+      const lengthMm = Number(parts[1]);
+      if (!Number.isFinite(lengthMm) || lengthMm <= 0) return "";
+      return (lengthMm / 1000).toFixed(3).replace(/0+$/, "").replace(/\.$/, "");
+    }
+
+    function shaftLenFromModel(model) {
+      const lengthMm = defaultShaftLengths[model];
+      if (!Number.isFinite(lengthMm) || lengthMm <= 0) return "";
+      return (lengthMm / 1000).toFixed(3).replace(/0+$/, "").replace(/\.$/, "");
+    }
+
+    function laborPriceFromModel(model) {
+      const price = defaultLaborPrices[model];
+      return Number.isFinite(price) ? String(price) : "";
+    }
+
+    function paintPriceFromModel(model) {
+      const price = defaultPaintPrices[model];
+      return Number.isFinite(price) ? String(price) : "";
+    }
+
+    function bearingPriceFromModel(model) {
+      const price = defaultBearingPrices[model];
+      return Number.isFinite(price) ? String(price) : "";
+    }
+
+    function housingPriceFromModel(model) {
+      const price = defaultHousingPrices[model];
+      return Number.isFinite(price) ? String(price) : "";
+    }
+
+    function clipPriceFromModel(model) {
+      const price = defaultClipPrices[model];
+      return Number.isFinite(price) ? String(price) : "";
+    }
+
+    function miscPriceFromModel(model) {
+      const price = defaultMiscPrices[model];
+      return Number.isFinite(price) ? String(price) : "";
+    }
+
+    function sealPriceFromModel(model) {
+      const price = defaultSealPrices[model];
+      return Number.isFinite(price) ? String(price) : "";
+    }
+
+    function renderHome() {
+      $("modelList").innerHTML = rollerModels.map((model) => {
+        const pipeLen = pipeLenFromModel(model);
+        return `
+          <button class="model-card" data-model="${esc(model)}" type="button">
+            <strong>${esc(model)}</strong>
+            <span>管长 ${esc(pipeLen)} 米 / 轴长 ${esc(shaftLenFromModel(model))} 米 / 轴承总价 ${esc(bearingPriceFromModel(model))}</span>
+          </button>
+        `;
+      }).join("");
+    }
+
+    function showHome() {
+      $("pageTitle").textContent = "托辊成本核算";
+      $("pageSubtitle").textContent = "先选型号，再单独核算这个型号的成本。";
+      $("backBtn").classList.add("hidden");
+      $("homeView").classList.remove("hidden");
+      $("detailView").classList.add("hidden");
+      $("actionBar").classList.add("hidden");
+      window.scrollTo(0, 0);
+    }
+
+    function showDetail() {
+      const model = currentRoller().model || "当前型号";
+      $("pageTitle").textContent = model;
+      $("pageSubtitle").textContent = "单独核算这个型号的单根成本、售价和利润。";
+      $("backBtn").classList.remove("hidden");
+      $("homeView").classList.add("hidden");
+      $("detailView").classList.remove("hidden");
+      $("actionBar").classList.remove("hidden");
+      window.scrollTo(0, 0);
+    }
+
+    function selectModel(model) {
+      const next = makeRoller();
+      next.model = model;
+      next.pipeLen = pipeLenFromModel(model);
+      next.shaftLen = shaftLenFromModel(model);
+      $("pipePrice").value = "0";
+      $("shaftMeterPrice").value = "0";
+      $("bearingPrice").value = bearingPriceFromModel(model) || $("bearingPrice").value;
+      $("sealPrice").value = sealPriceFromModel(model) || $("sealPrice").value;
+      $("housingPrice").value = housingPriceFromModel(model) || $("housingPrice").value;
+      $("clipPrice").value = clipPriceFromModel(model) || $("clipPrice").value;
+      $("laborPrice").value = laborPriceFromModel(model) || $("laborPrice").value;
+      $("paintPrice").value = paintPriceFromModel(model) || $("paintPrice").value;
+      $("miscPrice").value = miscPriceFromModel(model) || $("miscPrice").value;
+      $("note").value = "";
+      state.rollers = [next];
+      renderAll();
+      saveDraft();
+      showDetail();
+    }
+
+    function readPrices() {
+      const prices = {};
+      priceFields.forEach((id) => prices[id] = num($(id).value));
+      return prices;
+    }
+
+    function calcRoller(roller) {
+      const p = readPrices();
+      const pipeLength = p.pipeLength > 0 ? p.pipeLength : 1;
+      const pipeCost = p.pipePrice / pipeLength * num(roller.pipeLen);
+      const shaftCost = num(roller.shaftLen) * p.shaftMeterPrice;
+      const bearingCost = p.bearingPrice;
+      const sealCost = p.sealPrice;
+      const housingCost = p.housingPrice;
+      const clipCost = p.clipPrice;
+      const laborCost = p.laborPrice;
+      const edgeCost = p.edgePrice;
+      const paintCost = p.paintPrice;
+      const miscCost = p.miscPrice;
+      const unitCost = pipeCost + shaftCost + bearingCost + sealCost + housingCost + clipCost + laborCost + edgeCost + paintCost + miscCost;
+      const unitSalePrice = unitCost * 1.06;
+      const unitProfit = unitSalePrice - unitCost;
+      return { pipeCost, shaftCost, bearingCost, sealCost, housingCost, clipCost, laborCost, edgeCost, paintCost, miscCost, unitCost, unitSalePrice, unitProfit };
+    }
+
+    function totals() {
+      const roller = currentRoller();
+      const c = calcRoller(roller);
+      return { unitCost: c.unitCost, unitSalePrice: c.unitSalePrice, unitProfit: c.unitProfit };
+    }
+
+    function esc(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;");
+    }
+
+    function renderRollers() {
+      const wrap = $("rollers");
+      wrap.innerHTML = "";
+      [currentRoller()].forEach((roller) => {
+        const c = calcRoller(roller);
+        const node = document.createElement("article");
+        node.className = "roller";
+        node.dataset.rollerId = roller.id;
+        node.innerHTML = `
+          <div class="roller-top">
+            <div class="roller-title">
+              <strong>${esc(roller.model || "未选择型号")}</strong>
+              <span data-summary>成本 ${money(c.unitCost)} / 售价 ${money(c.unitSalePrice)}</span>
+            </div>
+          </div>
+          <div class="grid">
+            <div class="grid two">
+              <label>托辊管长
+                <input data-id="${roller.id}" data-field="pipeLen" type="number" inputmode="decimal" min="0" step="0.001" value="${esc(roller.pipeLen)}" placeholder="米">
+              </label>
+              <label>托辊轴长
+                <input data-id="${roller.id}" data-field="shaftLen" type="number" inputmode="decimal" min="0" step="0.001" value="${esc(roller.shaftLen)}" placeholder="米">
+              </label>
+            </div>
+          </div>
+          <div class="calc-box">
+            <div class="calc-row"><span>管子</span><strong data-cost="pipe">${money(c.pipeCost)}</strong></div>
+            <div class="calc-row"><span>轴</span><strong data-cost="shaft">${money(c.shaftCost)}</strong></div>
+            <div class="calc-row"><span>轴承总价</span><strong data-cost="bearing">${money(c.bearingCost)}</strong></div>
+            <div class="calc-row"><span>油封总价 + 瓦盒总价 + 卡簧总价</span><strong data-cost="smallParts">${money(c.sealCost + c.housingCost + c.clipCost)}</strong></div>
+            <div class="calc-row"><span>人工</span><strong data-cost="labor">${money(c.laborCost)}</strong></div>
+            <div class="calc-row"><span>洗边 + 烤漆 + 杂费</span><strong data-cost="finish">${money(c.edgeCost + c.paintCost + c.miscCost)}</strong></div>
+            <div class="calc-row final"><span>单根成本</span><strong data-cost="unit">${money(c.unitCost)}</strong></div>
+            <div class="calc-row final"><span>单根售价</span><strong data-cost="unitSale">${money(c.unitSalePrice)}</strong></div>
+            <div class="calc-row final"><span>单根利润</span><strong data-cost="unitProfit">${money(c.unitProfit)}</strong></div>
+          </div>
+        `;
+        wrap.appendChild(node);
+      });
+    }
+
+    function updateRollerDisplay(id) {
+      const roller = state.rollers.find((item) => item.id === id);
+      const card = document.querySelector(`[data-roller-id="${id}"]`);
+      if (!roller || !card) return;
+      const c = calcRoller(roller);
+      card.querySelector(".roller-title strong").textContent = roller.model || "未选择型号";
+      card.querySelector("[data-summary]").textContent = `成本 ${money(c.unitCost)} / 售价 ${money(c.unitSalePrice)}`;
+      card.querySelector('[data-cost="pipe"]').textContent = money(c.pipeCost);
+      card.querySelector('[data-cost="shaft"]').textContent = money(c.shaftCost);
+      card.querySelector('[data-cost="bearing"]').textContent = money(c.bearingCost);
+      card.querySelector('[data-cost="smallParts"]').textContent = money(c.sealCost + c.housingCost + c.clipCost);
+      card.querySelector('[data-cost="labor"]').textContent = money(c.laborCost);
+      card.querySelector('[data-cost="finish"]').textContent = money(c.edgeCost + c.paintCost + c.miscCost);
+      card.querySelector('[data-cost="unit"]').textContent = money(c.unitCost);
+      card.querySelector('[data-cost="unitSale"]').textContent = money(c.unitSalePrice);
+      card.querySelector('[data-cost="unitProfit"]').textContent = money(c.unitProfit);
+    }
+
+    function renderTotals() {
+      const t = totals();
+      $("grandTotal").textContent = money(t.unitSalePrice);
+      $("grandInfo").textContent = `成本 ${money(t.unitCost)}，利润 ${money(t.unitProfit)}`;
+    }
+
+    function renderAll() {
+      renderRollers();
+      renderTotals();
+    }
+
+    function readDraft() {
+      const draft = {};
+      formFields.forEach((id) => draft[id] = $(id).value);
+      draft.rollers = [{ ...currentRoller() }];
+      return draft;
+    }
+
+    function saveDraft() {
+      localStorage.setItem(draftKey, JSON.stringify(readDraft()));
+    }
+
+    function applyDraft(draft) {
+      formFields.forEach((id) => {
+        if (draft && draft[id] !== undefined) $(id).value = draft[id];
+      });
+      $("pipePrice").value = "0";
+      $("shaftMeterPrice").value = "0";
+      if (!$("pipeLength").value || $("pipeLength").value === "6") $("pipeLength").value = "5.9";
+      if (!$("date").value) $("date").value = today();
+      state.rollers = Array.isArray(draft?.rollers) && draft.rollers.length ? [{ ...draft.rollers[0] }] : [makeRoller()];
+      renderAll();
+      saveDraft();
+    }
+
+    function loadJson(key) {
+      try {
+        return JSON.parse(localStorage.getItem(key));
+      } catch {
+        return null;
+      }
+    }
+
+    function quoteText() {
+      const t = totals();
+      const lines = [];
+      lines.push("托辊成本核算");
+      if ($("customer").value.trim()) lines.push("项目/订单：" + $("customer").value.trim());
+      lines.push("日期：" + ($("date").value || today()));
+      lines.push("");
+      const roller = currentRoller();
+      const c = calcRoller(roller);
+      lines.push(`型号：${roller.model || "未选择型号"}`);
+      lines.push(`管长：${roller.pipeLen || 0}米，轴长：${roller.shaftLen || 0}米`);
+      lines.push(`管子：${money(c.pipeCost)}，轴：${money(c.shaftCost)}，轴承总价：${money(c.bearingCost)}`);
+      lines.push(`油封总价/瓦盒总价/卡簧总价：${money(c.sealCost + c.housingCost + c.clipCost)}，人工：${money(c.laborCost)}，洗边/烤漆/杂费：${money(c.edgeCost + c.paintCost + c.miscCost)}`);
+      lines.push(`单根成本：${money(c.unitCost)}`);
+      lines.push(`单根售价：${money(c.unitSalePrice)}（成本*1.06）`);
+      lines.push(`单根利润：${money(c.unitProfit)}`);
+      if ($("note").value.trim()) {
+        lines.push("");
+        lines.push("备注：" + $("note").value.trim());
+      }
+      return lines.join("\n");
+    }
+
+    async function copyQuote() {
+      const text = quoteText();
+      try {
+        await navigator.clipboard.writeText(text);
+      } catch {
+        const area = document.createElement("textarea");
+        area.value = text;
+        document.body.appendChild(area);
+        area.select();
+        document.execCommand("copy");
+        area.remove();
+      }
+      toast("成本明细已复制");
+    }
+
+    document.addEventListener("input", (event) => {
+      if (formFields.includes(event.target.id)) {
+        saveDraft();
+        renderAll();
+      }
+    });
+
+    document.addEventListener("focusin", (event) => {
+      if (event.target.matches('input[type="number"]') && event.target.value === "0") {
+        event.target.value = "";
+      }
+    });
+
+    document.addEventListener("focusout", (event) => {
+      if (event.target.matches('input[type="number"]') && event.target.value.trim() === "") {
+        event.target.value = "0";
+        event.target.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+    });
+
+    function updateRollerFromTarget(target) {
+      const id = target.dataset.id;
+      const field = target.dataset.field;
+      if (!id || !field) return;
+      const roller = state.rollers.find((item) => item.id === id);
+      if (!roller) return;
+      roller[field] = target.value;
+      if (field === "model") {
+        roller.pipeLen = pipeLenFromModel(target.value);
+        roller.shaftLen = shaftLenFromModel(target.value);
+        $("bearingPrice").value = bearingPriceFromModel(target.value) || $("bearingPrice").value;
+        $("sealPrice").value = sealPriceFromModel(target.value) || $("sealPrice").value;
+        $("housingPrice").value = housingPriceFromModel(target.value) || $("housingPrice").value;
+        $("clipPrice").value = clipPriceFromModel(target.value) || $("clipPrice").value;
+        $("laborPrice").value = laborPriceFromModel(target.value) || $("laborPrice").value;
+        $("paintPrice").value = paintPriceFromModel(target.value) || $("paintPrice").value;
+        $("miscPrice").value = miscPriceFromModel(target.value) || $("miscPrice").value;
+        saveDraft();
+        renderAll();
+        return;
+      }
+      saveDraft();
+      updateRollerDisplay(id);
+      renderTotals();
+    }
+
+    $("rollers").addEventListener("input", (event) => {
+      updateRollerFromTarget(event.target);
+    });
+
+    $("rollers").addEventListener("change", (event) => {
+      updateRollerFromTarget(event.target);
+    });
+
+    $("modelList").addEventListener("click", (event) => {
+      const button = event.target.closest("[data-model]");
+      if (!button) return;
+      selectModel(button.dataset.model);
+    });
+
+    $("backBtn").addEventListener("click", showHome);
+
+    $("savePriceBtn").addEventListener("click", () => {
+      const prices = {};
+      priceFields.forEach((id) => prices[id] = $(id).value);
+      localStorage.setItem(priceKey, JSON.stringify(prices));
+      toast("材料价格已保存");
+    });
+
+    $("newBtn").addEventListener("click", () => {
+      if (!confirm("清空当前成本核算，重新开始？")) return;
+      const prices = {};
+      priceFields.forEach((id) => prices[id] = $(id).value);
+      prices.pipePrice = "0";
+      prices.shaftMeterPrice = "0";
+      const oldModel = currentRoller().model;
+      const next = makeRoller();
+      next.model = oldModel;
+      next.pipeLen = pipeLenFromModel(oldModel);
+      next.shaftLen = shaftLenFromModel(oldModel);
+      prices.bearingPrice = bearingPriceFromModel(oldModel) || prices.bearingPrice;
+      prices.sealPrice = sealPriceFromModel(oldModel) || prices.sealPrice;
+      prices.housingPrice = housingPriceFromModel(oldModel) || prices.housingPrice;
+      prices.clipPrice = clipPriceFromModel(oldModel) || prices.clipPrice;
+      prices.laborPrice = laborPriceFromModel(oldModel) || prices.laborPrice;
+      prices.paintPrice = paintPriceFromModel(oldModel) || prices.paintPrice;
+      prices.miscPrice = miscPriceFromModel(oldModel) || prices.miscPrice;
+      applyDraft({ ...prices, customer: "", date: today(), note: "", rollers: [next] });
+      toast("已清空");
+    });
+
+    $("copyBtn").addEventListener("click", copyQuote);
+
+    const savedPrices = loadJson(priceKey) || {};
+    const draft = loadJson(draftKey) || {};
+    applyDraft({ ...savedPrices, ...draft });
+    renderHome();
+    showHome();
+  </script>
+</body>
+</html>
