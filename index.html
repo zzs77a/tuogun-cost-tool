@@ -122,6 +122,21 @@
       gap: 10px;
     }
 
+    .model-group {
+      margin-top: 16px;
+    }
+
+    .model-group:first-child {
+      margin-top: 0;
+    }
+
+    .model-group h3 {
+      margin: 0 0 8px;
+      color: var(--muted);
+      font-size: 14px;
+      letter-spacing: 0;
+    }
+
     .model-card {
       min-height: 74px;
       padding: 12px;
@@ -392,7 +407,7 @@
       <div class="section-title">
         <h2>选择托辊型号</h2>
       </div>
-      <div class="model-grid" id="modelList"></div>
+      <div id="modelList"></div>
     </section>
 
     <div id="detailView" class="hidden">
@@ -437,6 +452,12 @@
           </label>
           <label id="pipeLengthWrap">管的长度
             <input id="pipeLength" type="number" inputmode="decimal" min="0" step="0.01" value="5.9">
+          </label>
+          <label id="pipeWallWrap" class="hidden">管壁厚 mm
+            <input id="pipeWallThickness" type="number" inputmode="decimal" min="0" step="0.01" value="0">
+          </label>
+          <label id="pipeOuterWrap" class="hidden">外径 mm
+            <input id="pipeOuterDiameter" type="number" inputmode="decimal" min="0" step="0.01" value="133">
           </label>
           <label>洗边
             <input id="edgePrice" type="number" inputmode="decimal" min="0" step="0.01" value="0">
@@ -509,6 +530,8 @@
       "pipeMode",
       "pipePrice",
       "pipeLength",
+      "pipeWallThickness",
+      "pipeOuterDiameter",
       "shaftMeterPrice",
       "bearingPrice",
       "sealPrice",
@@ -537,7 +560,17 @@
       "108*525",
       "108*1150",
       "108*1400",
-      "108*1600"
+      "108*1600",
+      "133*380",
+      "133*465",
+      "133*530",
+      "133*600",
+      "133*950",
+      "133*1150",
+      "133*1400",
+      "133*1600",
+      "133*1800",
+      "133*2000"
     ];
     const defaultShaftLengths = {
       "89*190": 220,
@@ -555,7 +588,17 @@
       "108*525": 565,
       "108*1150": 1190,
       "108*1400": 1440,
-      "108*1600": 1640
+      "108*1600": 1640,
+      "133*380": 420,
+      "133*465": 505,
+      "133*530": 570,
+      "133*600": 640,
+      "133*950": 990,
+      "133*1150": 1190,
+      "133*1400": 1440,
+      "133*1600": 1640,
+      "133*1800": 1840,
+      "133*2000": 2040
     };
     const defaultLaborPrices = {
       "89*190": 1.45,
@@ -573,7 +616,17 @@
       "108*525": 2.6,
       "108*1150": 3.1,
       "108*1400": 3.5,
-      "108*1600": 3.8
+      "108*1600": 3.8,
+      "133*380": 3.05,
+      "133*465": 3.05,
+      "133*530": 3.05,
+      "133*600": 3.7,
+      "133*950": 3.7,
+      "133*1150": 6,
+      "133*1400": 6,
+      "133*1600": 6,
+      "133*1800": 8,
+      "133*2000": 8
     };
     const defaultPaintPrices = {
       "89*190": 0.4,
@@ -591,7 +644,17 @@
       "108*525": 1.5,
       "108*1150": 3,
       "108*1400": 4,
-      "108*1600": 5
+      "108*1600": 5,
+      "133*380": 2.2,
+      "133*465": 2.8,
+      "133*530": 3.2,
+      "133*600": 3.5,
+      "133*950": 4.5,
+      "133*1150": 5,
+      "133*1400": 6,
+      "133*1600": 7,
+      "133*1800": 9,
+      "133*2000": 15
     };
     const defaultBearingPrices = {
       "89*190": 2.14,
@@ -609,7 +672,17 @@
       "108*525": 4.3,
       "108*1150": 4.3,
       "108*1400": 4.3,
-      "108*1600": 4.3
+      "108*1600": 4.3,
+      "133*380": 4.9,
+      "133*465": 4.9,
+      "133*530": 4.9,
+      "133*600": 4.9,
+      "133*950": 4.9,
+      "133*1150": 4.9,
+      "133*1400": 4.9,
+      "133*1600": 4.9,
+      "133*1800": 4.9,
+      "133*2000": 4.9
     };
     const defaultHousingPrices = {
       "89*190": 1.04,
@@ -627,7 +700,17 @@
       "108*525": 1.76,
       "108*1150": 1.76,
       "108*1400": 1.76,
-      "108*1600": 1.76
+      "108*1600": 1.76,
+      "133*380": 3.4,
+      "133*465": 3.4,
+      "133*530": 3.4,
+      "133*600": 3.4,
+      "133*950": 3.4,
+      "133*1150": 3.4,
+      "133*1400": 3.4,
+      "133*1600": 3.4,
+      "133*1800": 3.4,
+      "133*2000": 3.4
     };
     const defaultClipPrices = {
       "89*190": 0.07,
@@ -645,7 +728,17 @@
       "108*525": 0.09,
       "108*1150": 0.09,
       "108*1400": 0.09,
-      "108*1600": 0.09
+      "108*1600": 0.09,
+      "133*380": 0.09,
+      "133*465": 0.09,
+      "133*530": 0.09,
+      "133*600": 0.09,
+      "133*950": 0.09,
+      "133*1150": 0.09,
+      "133*1400": 0.09,
+      "133*1600": 0.09,
+      "133*1800": 0.09,
+      "133*2000": 0.09
     };
     const defaultMiscPrices = {
       "89*190": 0.5,
@@ -663,7 +756,17 @@
       "108*525": 0.6,
       "108*1150": 0.6,
       "108*1400": 0.6,
-      "108*1600": 0.6
+      "108*1600": 0.6,
+      "133*380": 0.7,
+      "133*465": 0.7,
+      "133*530": 0.7,
+      "133*600": 0.7,
+      "133*950": 0.7,
+      "133*1150": 0.7,
+      "133*1400": 0.7,
+      "133*1600": 0.7,
+      "133*1800": 0.7,
+      "133*2000": 0.7
     };
     const defaultSealPrices = {
       "89*190": 0.24,
@@ -681,7 +784,17 @@
       "108*525": 0.48,
       "108*1150": 0.48,
       "108*1400": 0.48,
-      "108*1600": 0.48
+      "108*1600": 0.48,
+      "133*380": 1.5,
+      "133*465": 1.5,
+      "133*530": 1.5,
+      "133*600": 1.5,
+      "133*950": 1.5,
+      "133*1150": 1.5,
+      "133*1400": 1.5,
+      "133*1600": 1.5,
+      "133*1800": 1.5,
+      "133*2000": 1.5
     };
 
     function today() {
@@ -721,6 +834,10 @@
     function currentRoller() {
       if (!state.rollers[0]) state.rollers = [makeRoller()];
       return state.rollers[0];
+    }
+
+    function isModel133(model) {
+      return String(model || "").startsWith("133*");
     }
 
     function pipeLenFromModel(model) {
@@ -772,13 +889,24 @@
     }
 
     function renderHome() {
-      $("modelList").innerHTML = rollerModels.map((model) => {
-        const pipeLen = pipeLenFromModel(model);
+      const groups = ["89", "108", "133"];
+      $("modelList").innerHTML = groups.map((diameter) => {
+        const cards = rollerModels
+          .filter((model) => model.startsWith(diameter + "*"))
+          .map((model) => {
+            const pipeLen = pipeLenFromModel(model);
+            return `
+              <button class="model-card" data-model="${esc(model)}" type="button">
+                <strong>${esc(model)}</strong>
+                <span>管长 ${esc(pipeLen)} 米 / 轴长 ${esc(shaftLenFromModel(model))} 米 / 轴承总价 ${esc(bearingPriceFromModel(model))}</span>
+              </button>
+            `;
+          }).join("");
         return `
-          <button class="model-card" data-model="${esc(model)}" type="button">
-            <strong>${esc(model)}</strong>
-            <span>管长 ${esc(pipeLen)} 米 / 轴长 ${esc(shaftLenFromModel(model))} 米 / 轴承总价 ${esc(bearingPriceFromModel(model))}</span>
-          </button>
+          <section class="model-group">
+            <h3>${diameter} 系列</h3>
+            <div class="model-grid">${cards}</div>
+          </section>
         `;
       }).join("");
     }
@@ -811,6 +939,10 @@
       next.shaftLen = shaftLenFromModel(model);
       $("pipePrice").value = "0";
       $("shaftMeterPrice").value = "0";
+      if (isModel133(model)) {
+        $("pipeMode").value = "meter";
+        $("pipeOuterDiameter").value = "133";
+      }
       $("bearingPrice").value = bearingPriceFromModel(model) || $("bearingPrice").value;
       $("sealPrice").value = sealPriceFromModel(model) || $("sealPrice").value;
       $("housingPrice").value = housingPriceFromModel(model) || $("housingPrice").value;
@@ -826,9 +958,13 @@
     }
 
     function updatePipeModeUI() {
+      const is133 = isModel133(currentRoller().model);
       const isMeter = $("pipeMode").value === "meter";
-      $("pipePriceLabel").textContent = isMeter ? "每米管价格" : "一根管价格";
-      $("pipeLengthWrap").classList.toggle("hidden", isMeter);
+      $("pipePriceLabel").textContent = is133 ? "每公斤单价" : isMeter ? "每米管价格" : "一根管价格";
+      $("pipeMode").parentElement.classList.toggle("hidden", is133);
+      $("pipeLengthWrap").classList.toggle("hidden", isMeter || is133);
+      $("pipeWallWrap").classList.toggle("hidden", !is133);
+      $("pipeOuterWrap").classList.toggle("hidden", !is133);
     }
 
     function readPrices() {
@@ -843,7 +979,9 @@
       const p = readPrices();
       const pipeLength = p.pipeLength > 0 ? p.pipeLength : 1;
       const pipeMeterPrice = p.pipeMode === "meter" ? p.pipePrice : p.pipePrice / pipeLength;
-      const pipeCost = pipeMeterPrice * num(roller.pipeLen);
+      const pipeCost = isModel133(roller.model)
+        ? 0.02466 * p.pipeWallThickness * (p.pipeOuterDiameter - p.pipeWallThickness) * p.pipePrice * num(roller.pipeLen)
+        : pipeMeterPrice * num(roller.pipeLen);
       const shaftCost = num(roller.shaftLen) * p.shaftMeterPrice;
       const bearingCost = p.bearingPrice;
       const sealCost = p.sealPrice;
@@ -962,6 +1100,7 @@
       $("pipePrice").value = "0";
       $("shaftMeterPrice").value = "0";
       if (!$("pipeLength").value || $("pipeLength").value === "6") $("pipeLength").value = "5.9";
+      if (!$("pipeOuterDiameter").value) $("pipeOuterDiameter").value = "133";
       if (!$("date").value) $("date").value = today();
       state.rollers = Array.isArray(draft?.rollers) && draft.rollers.length ? [{ ...draft.rollers[0] }] : [makeRoller()];
       updatePipeModeUI();
@@ -988,6 +1127,9 @@
       const c = calcRoller(roller);
       lines.push(`型号：${roller.model || "未选择型号"}`);
       lines.push(`管长：${roller.pipeLen || 0}米，轴长：${roller.shaftLen || 0}米`);
+      if (isModel133(roller.model)) {
+        lines.push(`133管子公式：0.02466*壁厚${$("pipeWallThickness").value || 0}*(外径${$("pipeOuterDiameter").value || 133}-壁厚)*每公斤单价*管长`);
+      }
       lines.push(`管子：${money(c.pipeCost)}，轴：${money(c.shaftCost)}，轴承总价：${money(c.bearingCost)}`);
       lines.push(`油封总价/瓦盒总价/卡簧总价：${money(c.sealCost + c.housingCost + c.clipCost)}，人工：${money(c.laborCost)}，洗边/烤漆/杂费：${money(c.edgeCost + c.paintCost + c.miscCost)}`);
       lines.push(`单根成本：${money(c.unitCost)}`);
@@ -1053,6 +1195,10 @@
       if (field === "model") {
         roller.pipeLen = pipeLenFromModel(target.value);
         roller.shaftLen = shaftLenFromModel(target.value);
+        if (isModel133(target.value)) {
+          $("pipeMode").value = "meter";
+          $("pipeOuterDiameter").value = "133";
+        }
         $("bearingPrice").value = bearingPriceFromModel(target.value) || $("bearingPrice").value;
         $("sealPrice").value = sealPriceFromModel(target.value) || $("sealPrice").value;
         $("housingPrice").value = housingPriceFromModel(target.value) || $("housingPrice").value;
@@ -1099,6 +1245,10 @@
       prices.pipePrice = "0";
       prices.shaftMeterPrice = "0";
       const oldModel = currentRoller().model;
+      if (isModel133(oldModel)) {
+        prices.pipeMode = "meter";
+        prices.pipeOuterDiameter = "133";
+      }
       const next = makeRoller();
       next.model = oldModel;
       next.pipeLen = pipeLenFromModel(oldModel);
