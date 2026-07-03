@@ -423,13 +423,19 @@
         </div>
         <p class="hint">这些不是按型号默认的，进入型号后先填这里。</p>
         <div class="grid two">
-          <label>一根管单价
+          <label>管价方式
+            <select id="pipeMode">
+              <option value="whole">一根管价格</option>
+              <option value="meter">每米管价格</option>
+            </select>
+          </label>
+          <label><span id="pipePriceLabel">一根管价格</span>
             <input id="pipePrice" type="number" inputmode="decimal" min="0" step="0.01" value="0">
           </label>
           <label>一米轴价格
             <input id="shaftMeterPrice" type="number" inputmode="decimal" min="0" step="0.01" value="0">
           </label>
-          <label>管的长度
+          <label id="pipeLengthWrap">管的长度
             <input id="pipeLength" type="number" inputmode="decimal" min="0" step="0.01" value="5.9">
           </label>
           <label>洗边
@@ -500,6 +506,7 @@
     const $ = (id) => document.getElementById(id);
 
     const priceFields = [
+      "pipeMode",
       "pipePrice",
       "pipeLength",
       "shaftMeterPrice",
@@ -818,16 +825,25 @@
       showDetail();
     }
 
+    function updatePipeModeUI() {
+      const isMeter = $("pipeMode").value === "meter";
+      $("pipePriceLabel").textContent = isMeter ? "每米管价格" : "一根管价格";
+      $("pipeLengthWrap").classList.toggle("hidden", isMeter);
+    }
+
     function readPrices() {
       const prices = {};
-      priceFields.forEach((id) => prices[id] = num($(id).value));
+      priceFields.forEach((id) => {
+        prices[id] = id === "pipeMode" ? $(id).value : num($(id).value);
+      });
       return prices;
     }
 
     function calcRoller(roller) {
       const p = readPrices();
       const pipeLength = p.pipeLength > 0 ? p.pipeLength : 1;
-      const pipeCost = p.pipePrice / pipeLength * num(roller.pipeLen);
+      const pipeMeterPrice = p.pipeMode === "meter" ? p.pipePrice : p.pipePrice / pipeLength;
+      const pipeCost = pipeMeterPrice * num(roller.pipeLen);
       const shaftCost = num(roller.shaftLen) * p.shaftMeterPrice;
       const bearingCost = p.bearingPrice;
       const sealCost = p.sealPrice;
@@ -942,11 +958,13 @@
       formFields.forEach((id) => {
         if (draft && draft[id] !== undefined) $(id).value = draft[id];
       });
+      if (!$("pipeMode").value) $("pipeMode").value = "whole";
       $("pipePrice").value = "0";
       $("shaftMeterPrice").value = "0";
       if (!$("pipeLength").value || $("pipeLength").value === "6") $("pipeLength").value = "5.9";
       if (!$("date").value) $("date").value = today();
       state.rollers = Array.isArray(draft?.rollers) && draft.rollers.length ? [{ ...draft.rollers[0] }] : [makeRoller()];
+      updatePipeModeUI();
       renderAll();
       saveDraft();
     }
@@ -999,6 +1017,14 @@
 
     document.addEventListener("input", (event) => {
       if (formFields.includes(event.target.id)) {
+        saveDraft();
+        renderAll();
+      }
+    });
+
+    document.addEventListener("change", (event) => {
+      if (event.target.id === "pipeMode") {
+        updatePipeModeUI();
         saveDraft();
         renderAll();
       }
