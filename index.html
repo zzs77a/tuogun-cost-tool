@@ -960,7 +960,7 @@
     function updatePipeModeUI() {
       const is133 = isModel133(currentRoller().model);
       const isMeter = $("pipeMode").value === "meter";
-      $("pipePriceLabel").textContent = is133 ? "每公斤单价" : isMeter ? "每米管价格" : "一根管价格";
+      $("pipePriceLabel").textContent = is133 ? "每公斤管的单价" : isMeter ? "每米管价格" : "一根管价格";
       $("pipeMode").parentElement.classList.toggle("hidden", is133);
       $("pipeLengthWrap").classList.toggle("hidden", isMeter || is133);
       $("pipeWallWrap").classList.toggle("hidden", !is133);
@@ -1128,7 +1128,7 @@
       lines.push(`型号：${roller.model || "未选择型号"}`);
       lines.push(`管长：${roller.pipeLen || 0}米，轴长：${roller.shaftLen || 0}米`);
       if (isModel133(roller.model)) {
-        lines.push(`133管子公式：0.02466*壁厚${$("pipeWallThickness").value || 0}*(外径${$("pipeOuterDiameter").value || 133}-壁厚)*每公斤单价*管长`);
+        lines.push(`133管子公式：0.02466*壁厚${$("pipeWallThickness").value || 0}*(外径${$("pipeOuterDiameter").value || 133}-壁厚)*每公斤管的单价*管长`);
       }
       lines.push(`管子：${money(c.pipeCost)}，轴：${money(c.shaftCost)}，轴承总价：${money(c.bearingCost)}`);
       lines.push(`油封总价/瓦盒总价/卡簧总价：${money(c.sealCost + c.housingCost + c.clipCost)}，人工：${money(c.laborCost)}，洗边/烤漆/杂费：${money(c.edgeCost + c.paintCost + c.miscCost)}`);
