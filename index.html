@@ -475,10 +475,7 @@
         <p class="hint">这些不是按型号默认的，进入型号后先填这里。</p>
         <div class="grid two">
           <label>管价方式
-            <select id="pipeMode">
-              <option value="whole">一根管价格</option>
-              <option value="meter">每米管价格</option>
-            </select>
+            <select id="pipeMode"></select>
           </label>
           <label><span id="pipePriceLabel">一根管价格</span>
             <input id="pipePrice" type="number" inputmode="decimal" min="0" step="0.01" value="0">
@@ -1064,7 +1061,7 @@
       $("pipePrice").value = "0";
       $("shaftMeterPrice").value = "0";
       if (isKgPipeModel(model)) {
-        $("pipeMode").value = "meter";
+        $("pipeMode").value = "kg";
         $("pipeWallThickness").value = defaultPipeWallThickness(model);
         $("pipeOuterDiameter").value = defaultOuterDiameter(model);
       }
@@ -1084,12 +1081,23 @@
 
     function updatePipeModeUI() {
       const isKgPipe = isKgPipeModel(currentRoller().model);
-      const isMeter = $("pipeMode").value === "meter";
-      $("pipePriceLabel").textContent = isKgPipe ? "每公斤管的单价" : isMeter ? "每米管价格" : "一根管价格";
-      $("pipeMode").parentElement.classList.toggle("hidden", isKgPipe);
-      $("pipeLengthWrap").classList.toggle("hidden", isMeter || isKgPipe);
-      $("pipeWallWrap").classList.toggle("hidden", !isKgPipe);
-      $("pipeOuterWrap").classList.toggle("hidden", !isKgPipe);
+      const oldMode = $("pipeMode").value;
+      const options = isKgPipe
+        ? [["whole", "每米管价格"], ["kg", "每公斤管的单价"]]
+        : [["whole", "一根管价格"], ["meter", "每米管价格"]];
+      $("pipeMode").innerHTML = options
+        .map(([value, label]) => `<option value="${value}">${label}</option>`)
+        .join("");
+      $("pipeMode").value = options.some(([value]) => value === oldMode)
+        ? oldMode
+        : (isKgPipe ? "kg" : "whole");
+      const mode = $("pipeMode").value;
+      const isMeter = mode === "meter";
+      const isKg = mode === "kg";
+      $("pipePriceLabel").textContent = isKg ? "每公斤管的单价" : isMeter ? "每米管价格" : "一根管价格";
+      $("pipeLengthWrap").classList.toggle("hidden", isMeter || isKg);
+      $("pipeWallWrap").classList.toggle("hidden", !isKg);
+      $("pipeOuterWrap").classList.toggle("hidden", !isKg);
     }
 
     function readPrices() {
@@ -1104,7 +1112,7 @@
       const p = readPrices();
       const pipeLength = p.pipeLength > 0 ? p.pipeLength : 1;
       const pipeMeterPrice = p.pipeMode === "meter" ? p.pipePrice : p.pipePrice / pipeLength;
-      const pipeCost = isKgPipeModel(roller.model)
+      const pipeCost = isKgPipeModel(roller.model) && p.pipeMode === "kg"
         ? 0.02466 * p.pipeWallThickness * (p.pipeOuterDiameter - p.pipeWallThickness) * p.pipePrice * num(roller.pipeLen)
         : pipeMeterPrice * num(roller.pipeLen);
       const shaftCost = num(roller.shaftLen) * p.shaftMeterPrice;
@@ -1252,7 +1260,7 @@
       const c = calcRoller(roller);
       lines.push(`型号：${roller.model || "未选择型号"}`);
       lines.push(`管长：${roller.pipeLen || 0}米，轴长：${roller.shaftLen || 0}米`);
-      if (isKgPipeModel(roller.model)) {
+      if (isKgPipeModel(roller.model) && $("pipeMode").value === "kg") {
         const diameter = defaultOuterDiameter(roller.model);
         lines.push(`${diameter}管子公式：0.02466*壁厚${$("pipeWallThickness").value || 0}*(外径${$("pipeOuterDiameter").value || diameter}-壁厚)*每公斤管的单价*管长`);
       }
@@ -1322,7 +1330,7 @@
         roller.pipeLen = pipeLenFromModel(target.value);
         roller.shaftLen = shaftLenFromModel(target.value);
         if (isKgPipeModel(target.value)) {
-          $("pipeMode").value = "meter";
+          $("pipeMode").value = "kg";
           $("pipeWallThickness").value = defaultPipeWallThickness(target.value);
           $("pipeOuterDiameter").value = defaultOuterDiameter(target.value);
         }
@@ -1380,7 +1388,7 @@
       prices.shaftMeterPrice = "0";
       const oldModel = currentRoller().model;
       if (isKgPipeModel(oldModel)) {
-        prices.pipeMode = "meter";
+        prices.pipeMode = "kg";
         prices.pipeWallThickness = defaultPipeWallThickness(oldModel);
         prices.pipeOuterDiameter = defaultOuterDiameter(oldModel);
       }
